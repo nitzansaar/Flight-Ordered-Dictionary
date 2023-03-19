@@ -4,7 +4,8 @@ package skipList;
  * Represents data in the FlightNode. Contains the flight number and the price
  */
 public class FlightData {
-	// FILL IN CODE: add private variables: flightNumber and price
+	private String flightNumber;
+	private double price;
 
 	/**
      * Constructor for FlightData
@@ -13,8 +14,14 @@ public class FlightData {
 	 */
 	public FlightData(String fnum, double price) {
 		// FILL IN CODE
-	}
+		this.flightNumber = fnum;
+		this.price = price;
 
+
+	}
+	public String toString() {
+		return "(" + flightNumber + ", " + price + ")";
+	}
 	/**
      * Returns the number of the flight
 	 * @return flight number

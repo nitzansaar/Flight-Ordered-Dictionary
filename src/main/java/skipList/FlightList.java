@@ -1,22 +1,72 @@
 package skipList;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /** The class that stores flights in a skip list. */
 public class FlightList {
 
-	// FILL IN CODE: needs to store the head and the height of the skip
-	// list. Decide if you also need the tail.
+	private final int NEG_INFINITY = Integer.MIN_VALUE;
+	private final int POS_INFINITY = Integer.MAX_VALUE;
+	final String NEGATIVE_INF = "\u0000";
+	final String POSITIVE_INF = "\uFFFF";
+	private final FlightKey HEAD_KEY = new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF);
+	private final FlightData HEAD_DATA = new FlightData(NEGATIVE_INF, NEG_INFINITY);
+	private final FlightKey TAIL_KEY = new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF);
+	private final FlightData TAIL_DATA = new FlightData(POSITIVE_INF, POS_INFINITY);
+	private FlightNode head;
+	private FlightNode tail;
 
 	/**
 	 * Constructor.
 	 * Reads flights from the file and inserts each flight into the skip list.
-	 * @param filename the name of he file
+	 * @param filename the name of the file
 	 */
 	public FlightList(String filename) {
-		// FILL IN CODE
+		head = new FlightNode(HEAD_KEY, HEAD_DATA);
+		tail = new FlightNode(TAIL_KEY, TAIL_DATA);
+		readFile(filename);
 
+	}
+	public void readFile(String filename) {
+		File file = new File(filename);
+		try {
+			FileReader freader = new FileReader(file);
+			BufferedReader reader = new BufferedReader(freader);
+			String line;
+			// read file and create key/data then create node
+			while ((line = reader.readLine()) != null) {
+				String [] parts = line.split(" ");
+				if (parts.length != 6) {
+					throw new IllegalArgumentException();
+				}
+				FlightKey tempKey = new FlightKey(parts[0], parts[1], parts[2], parts[3]);
+				FlightData tempData = new FlightData(parts[4], Double.parseDouble(parts[5]));
+				// determine tower height and insert node at each level
+				insert(tempKey, tempData);
+			}
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	public int getRandom() {
+		Random random = new Random();
+		int count = 0;
+		int flip;
+
+		while (true) {
+			flip = random.nextInt(2);
+			if (flip == 1) {
+				count++;
+			} else {
+				break;
+			}
+		}
+		return count;
 	}
 
 	/**
@@ -41,6 +91,8 @@ public class FlightList {
 	 */
 	public boolean insert(FlightKey key, FlightData data) {
 		// FILL IN CODE
+
+
 		return false; // don't forget to change it
 	}
 

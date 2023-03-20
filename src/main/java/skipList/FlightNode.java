@@ -9,7 +9,10 @@ public class FlightNode {
 	private FlightKey key;
 	private FlightData data;
 	// FILL IN CODE: add other variables: next, prev, down, up
-	private FlightNode next, prev, down, up;
+	FlightNode next;
+	FlightNode prev;
+	FlightNode down;
+	FlightNode up;
 
 
 	/**
@@ -20,6 +23,10 @@ public class FlightNode {
 	public FlightNode(FlightKey key, FlightData data) {
 		this.key = key;
 		this.data = data;
+		this.next = null;
+		this.prev = null;
+		this.down = null;
+		this.up = null;
 
 	}
 

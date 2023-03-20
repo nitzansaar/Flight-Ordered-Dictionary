@@ -12,12 +12,10 @@ public class FlightList {
 	private final int POS_INFINITY = Integer.MAX_VALUE;
 	final String NEGATIVE_INF = "\u0000";
 	final String POSITIVE_INF = "\uFFFF";
-	private final FlightKey HEAD_KEY = new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF);
-	private final FlightData HEAD_DATA = new FlightData(NEGATIVE_INF, NEG_INFINITY);
-	private final FlightKey TAIL_KEY = new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF);
-	private final FlightData TAIL_DATA = new FlightData(POSITIVE_INF, POS_INFINITY);
 	private FlightNode head;
 	private FlightNode tail;
+	private int heightOfSkipList = 0;
+	Random random = new Random();
 
 	/**
 	 * Constructor.
@@ -25,8 +23,13 @@ public class FlightList {
 	 * @param filename the name of the file
 	 */
 	public FlightList(String filename) {
-		head = new FlightNode(HEAD_KEY, HEAD_DATA);
-		tail = new FlightNode(TAIL_KEY, TAIL_DATA);
+		// set head to negative infinity and tail to positive infinity
+		head = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF),
+				new FlightData(NEGATIVE_INF, NEG_INFINITY));
+		tail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF),
+				new FlightData(POSITIVE_INF, POS_INFINITY));
+		head.next = tail;
+		tail.prev = head;
 		readFile(filename);
 
 	}
@@ -38,7 +41,7 @@ public class FlightList {
 			String line;
 			// read file and create key/data then create node
 			while ((line = reader.readLine()) != null) {
-				String [] parts = line.split(" ");
+				String[] parts = line.split(" ");
 				if (parts.length != 6) {
 					throw new IllegalArgumentException();
 				}
@@ -53,21 +56,6 @@ public class FlightList {
 			throw new RuntimeException(e);
 		}
 	}
-	public int getRandom() {
-		Random random = new Random();
-		int count = 0;
-		int flip;
-
-		while (true) {
-			flip = random.nextInt(2);
-			if (flip == 1) {
-				count++;
-			} else {
-				break;
-			}
-		}
-		return count;
-	}
 
 	/**
 	 * Returns true if the node with the given key exists in the skip list,
@@ -77,8 +65,25 @@ public class FlightList {
 	 * @return true if the key is in the skip list, false otherwise
 	 */
 	public boolean find(FlightKey key) {
-		// FILL IN CODE
-		return false; // don't forget to change it
+		FlightNode current = head.next;
+		while (current != null && current != tail) {
+			if (current.getKey().compareTo(key) == 0) {
+				return true;
+			}
+			current = current.next;
+		}
+		return false;
+	}
+
+	public FlightNode getPosition(FlightKey key) {
+		FlightNode node = head;
+		while (node.down != null) {
+			node = node.down;
+			while (key.compareTo(node.next.getKey()) > 0) {
+				node = node.next;
+			}
+		}
+		return node;
 	}
 
 	/**
@@ -90,10 +95,20 @@ public class FlightList {
 	 * @return true if insertion was successful
 	 */
 	public boolean insert(FlightKey key, FlightData data) {
-		// FILL IN CODE
-
-
-		return false; // don't forget to change it
+		FlightNode insertion = getPosition(key);
+		// already in the skip list means we can't insert
+		if (insertion.getKey().compareTo(key) == 0) {
+			return false;
+		}
+		// determine height of tower
+		int numTails = 0;// represents the height
+		while (random.nextBoolean() == true) {
+			numTails++;
+			if (numTails >= heightOfSkipList) {
+				heightOfSkipList++;
+			}
+		}
+		return true;
 	}
 
 	/**

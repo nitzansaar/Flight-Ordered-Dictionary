@@ -34,8 +34,19 @@ public class FlightKey implements Comparable<FlightKey> {
      * @return -1, if this key is < other, > -1 if the opposite, and 0 if equal.  </>
 	 */
 	public int compareTo(FlightKey other) {
-		// FILL IN CODE
-		return 0; // don't forget to change it
+		int originCompare = this.origin.compareTo(other.origin);
+		if (originCompare != 0) {
+			return originCompare;
+		}
+		int destCompare = this.dest.compareTo(other.dest);
+		if (destCompare != 0) {
+			return destCompare;
+		}
+		int dateCompare = this.date.compareTo(other.date);
+		if (dateCompare != 0) {
+			return dateCompare;
+		}
+		return this.time.compareTo(other.time);
 	}
 
 	/**

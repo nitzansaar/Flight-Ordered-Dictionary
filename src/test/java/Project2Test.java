@@ -33,7 +33,7 @@ public class Project2Test {
                 if (!list.find(key)) {
                     Assert.fail("Failed to find the following flight: " + s);
                 }
-//                System.out.println(list);
+                System.out.println(list);
             }
         }
         catch (IOException e) {
@@ -60,7 +60,7 @@ public class Project2Test {
                 expectedPredecessors, expectedSuccessors);
 
         FlightList list = new FlightList(filename);
-        for (int i =0 ; i < flightsToTest.size(); i++) {
+        for (int i = 0 ; i < flightsToTest.size(); i++) {
             FlightKey key = flightsToTest.get(i);
             List<FlightNode> results = list.findFlights(key, timeDifference[i]);
 

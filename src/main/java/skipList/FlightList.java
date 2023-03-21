@@ -193,12 +193,13 @@ public class FlightList {
      * @return predecessors of the given key
      */
     public List<FlightNode> predecessors(FlightKey key, int timeFrame) {
+        int low = key.getHour() - timeFrame;
         List<FlightNode> arr = new ArrayList<>();
         FlightNode current = search(key);
         if (current.getKey().compareTime(key) < 0) {
             arr.add(current);
         }
-        while (current.prev != null && sameKey(current.prev.getKey(), key)) {
+        while (current.prev != null && sameKey(current.prev.getKey(), key) && (current.getKey().getHour() >= low)) {
             arr.add(current.prev);
             current = current.prev;
         }
@@ -263,9 +264,23 @@ public class FlightList {
      * as the key, and whose departure time is within a given timeframe
      */
     public List<FlightNode> findFlights(FlightKey key, int timeFrame) {
+        int low = key.getHour() - timeFrame;
+        int high = key.getHour() + timeFrame;
         List<FlightNode> resFlights = new ArrayList<>();
-        // FILL IN CODE
+        FlightNode current = search(key);
+        while (current != null && sameKey(current.getKey(), key) && (current.getKey().getHour() >= low)) {
+            resFlights.add(current);
+            current = current.prev;
+        }
+        Collections.reverse(resFlights);
 
+        List<FlightNode> successors = successors(key);
+
+        for (FlightNode successor : successors) {
+            if (successor.getKey().getHour() <= high) {
+                resFlights.add(successor);
+            }
+        }
         return resFlights;
     }
 

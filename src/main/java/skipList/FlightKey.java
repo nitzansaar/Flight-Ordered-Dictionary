@@ -30,6 +30,11 @@ public class FlightKey implements Comparable<FlightKey> {
 		return this.time.compareTo(other.time);
 	}
 
+	public int getHour() {
+		String[] timeParts = this.time.split(":");
+		return Integer.parseInt(timeParts[0]);
+	}
+
 	/**
      * Compares a given flight key with the one given as a parameter.
 	 * @param other

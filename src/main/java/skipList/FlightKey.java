@@ -26,7 +26,9 @@ public class FlightKey implements Comparable<FlightKey> {
 		this.time = time;
 	}
 
-	// FILL IN CODE: Write getters for origin, destination, date and time
+	public int compareTime(FlightKey other) {
+		return this.time.compareTo(other.time);
+	}
 
 	/**
      * Compares a given flight key with the one given as a parameter.

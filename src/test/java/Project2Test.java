@@ -29,9 +29,11 @@ public class Project2Test {
                     throw new IndexOutOfBoundsException();
                 FlightKey key = new FlightKey(arr[0], arr[1], arr[2], arr[3]);
                 // make sure that a flight with this key is in the skip list:
+//                System.out.println(key);
                 if (!list.find(key)) {
                     Assert.fail("Failed to find the following flight: " + s);
                 }
+//                System.out.println(list);
             }
         }
         catch (IOException e) {
@@ -113,6 +115,9 @@ public class Project2Test {
 
             if (expectedResult.length != results.size()) {
                 System.out.println(message1 + " the number of flights returned for " + key + " is not what was expected");
+                for (int x = 0; x < results.size(); x++) {
+                    System.out.println(results.get(x).getKey());
+                }
                 System.out.println(message2);
                 for (int l=0; l < expectedResult.length; l++)
                     System.out.println(expectedResult[l].getKey() + " ");

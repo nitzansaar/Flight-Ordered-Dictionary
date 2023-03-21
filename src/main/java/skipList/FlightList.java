@@ -2,6 +2,7 @@ package skipList;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -27,8 +28,9 @@ public class FlightList {
         readFile(filename);
     }
 
-    // Initialize head and tail with negative and positive infinity
+    // initialize head and tail with negative and positive infinity
     private void initializeHeadAndTail() {
+        // start with dummy list on top
         head = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF), null);
         tail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF), null);
         head.next = tail;
@@ -41,18 +43,12 @@ public class FlightList {
             FileReader freader = new FileReader(file);
             BufferedReader reader = new BufferedReader(freader);
             String line;
-            // read file and create key/data then create node
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(" ");
-                if (parts.length != 6) {
-                    throw new IllegalArgumentException();
-                }
                 FlightKey tempKey = new FlightKey(parts[0], parts[1], parts[2], parts[3]);
                 FlightData tempData = new FlightData(parts[4], Double.parseDouble(parts[5]));
                 insert(tempKey, tempData);
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -70,21 +66,23 @@ public class FlightList {
         while (current.down != null) { // assuming there is a dummy list on top level
             current = current.down;
             while (key.compareTo(current.next.getKey()) >= 0) { // if key is greater
+//                System.out.println(current.getKey());
                 current = current.next;
             }
         }
+//        System.out.println("Found: " + key.toString());
         return current.getKey().compareTo(key) == 0;
     }
 
-    public FlightNode getPosition(FlightKey key) {
+    public FlightNode search(FlightKey key) {
         FlightNode node = head;
         while (node.down != null) {
             node = node.down;
-            while (key.compareTo(node.next.getKey()) > 0) { // stop when key is smaller than current
+            while (key.compareTo(node.next.getKey()) >= 0) { // stop when key is smaller than current
                 node = node.next;
             }
         }
-        return node; // the node right before the position we wish to insert
+        return node; // either the same node or the one right before
     }
 
     public void addNewLevel() {
@@ -102,7 +100,7 @@ public class FlightList {
         tail.up = newTail;
         head = newHead;
         tail = newTail;
-
+        // now head is pointing to the top left node
     }
 
     /**
@@ -115,14 +113,15 @@ public class FlightList {
      */
     public boolean insert(FlightKey key, FlightData data) {
         // get position right before where node should be inserted
-        FlightNode position = getPosition(key);
+        FlightNode position = search(key);
         FlightNode insertPosition;
 
         // if key already exists, insertion is unsuccessful
-        if (find(key)) {
+        if (position.getKey().compareTo(key) == 0) {
             return false;
         }
         int towerHeight = 0;
+        // tower will have height of at least 1
         do {
             towerHeight++;
             // if towerHeight exceeds current skipHeight we need to increase skipHeight and add new level
@@ -132,7 +131,7 @@ public class FlightList {
             }
             // store the insertion point at current level
             insertPosition = position;
-            // move pos until there is a node above to ensure correct placement
+            // move pos until there is a node above
             while (position.up == null) {
                 position = position.prev;
             }
@@ -145,16 +144,15 @@ public class FlightList {
             newNode.prev = insertPosition;
             insertPosition.next.prev = newNode;
             insertPosition.next = newNode;
+            // check lower levels
             if (position.down != null) {
                 FlightNode nodeBeforeNew = position.down.down;
-                if (nodeBeforeNew != null) {
-                    while (nodeBeforeNew.next != null && !nodeBeforeNew.next.getKey().equals(key)) {
-                        nodeBeforeNew = nodeBeforeNew.next;
-                    }
-                    if (nodeBeforeNew.next != null) {
-                        newNode.down = nodeBeforeNew.next;
-                        nodeBeforeNew.next.up = newNode;
-                    }
+                while (nodeBeforeNew != null && nodeBeforeNew.next.getKey().compareTo(key) < 0) {
+                    nodeBeforeNew = nodeBeforeNew.next;
+                }
+                if (nodeBeforeNew != null && nodeBeforeNew.next.getKey().compareTo(key) == 0) {
+                    newNode.down = nodeBeforeNew.next;
+                    nodeBeforeNew.next.up = newNode;
                 }
             }
         } while (random.nextBoolean()); // coin flip
@@ -171,10 +169,19 @@ public class FlightList {
      * @return successors of the given key
      */
     public List<FlightNode> successors(FlightKey key) {
-        List<FlightNode> arr = new ArrayList<>();
-        // FILL IN CODE
+        List<FlightNode> arrayList = new ArrayList<>();
+        FlightNode current = search(key);
+        while (current.next != null && sameKey(current.next.getKey(), key)) {
+            arrayList.add(current.next);
+            current = current.next;
+        }
+        return arrayList;
+    }
 
-        return arr;
+    private boolean sameKey(FlightKey key1, FlightKey key2) {
+        return key1.getOrigin().compareTo(key2.getOrigin()) == 0 &&
+                key1.getDest().compareTo(key2.getDest()) == 0 &&
+                key1.getDate().compareTo(key2.getDate()) == 0;
     }
 
     /**
@@ -187,10 +194,17 @@ public class FlightList {
      */
     public List<FlightNode> predecessors(FlightKey key, int timeFrame) {
         List<FlightNode> arr = new ArrayList<>();
+        FlightNode current = search(key);
+        if (current.getKey().compareTime(key) < 0) {
+            arr.add(current);
+        }
+        while (current.prev != null && sameKey(current.prev.getKey(), key)) {
+            arr.add(current.prev);
+            current = current.prev;
+        }
 
-        // FILL IN CODE
+        Collections.reverse(arr);
         return arr;
-
     }
 
     /**
@@ -201,9 +215,29 @@ public class FlightList {
      * (SFO, JFK, 03/15, 06:30),   (SFO, JFK, 03/15, 7:15), (SFO, JFK, 03/20, 5:00), (SFO, PVD, 03/14, 09:15)
      */
     public String toString() {
-        // FILL IN CODE
+        StringBuilder sb = new StringBuilder();
 
-        return ""; // don't forget to change it
+        FlightNode startNode = head;
+
+        FlightNode topLevelNode = startNode;
+        int level = skipHeight;
+
+        while (topLevelNode != null) {
+            sb.append("\nLevel: " + level + "\n");
+            while (startNode != null) {
+                sb.append(startNode.getKey());
+                if (startNode.next != null) {
+                    sb.append(" - ");
+                }
+
+                startNode = startNode.next;
+            }
+
+            topLevelNode = topLevelNode.down;
+            startNode = topLevelNode;
+            level--;
+        }
+        return sb.toString();
     }
 
     /**

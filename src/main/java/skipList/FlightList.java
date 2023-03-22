@@ -144,15 +144,16 @@ public class FlightList {
             newNode.prev = insertPosition;
             insertPosition.next.prev = newNode;
             insertPosition.next = newNode;
-            // check lower levels
             if (position.down != null) {
-                FlightNode nodeBeforeNew = position.down.down;
-                while (nodeBeforeNew != null && nodeBeforeNew.next.getKey().compareTo(key) < 0) {
-                    nodeBeforeNew = nodeBeforeNew.next;
+                FlightNode nodeUnderNew = position.down.down;
+                // traverse until we reach the correct node
+                while (nodeUnderNew != null && nodeUnderNew.next.getKey().compareTo(key) < 0) {
+                    nodeUnderNew = nodeUnderNew.next;
                 }
-                if (nodeBeforeNew != null && nodeBeforeNew.next.getKey().compareTo(key) == 0) {
-                    newNode.down = nodeBeforeNew.next;
-                    nodeBeforeNew.next.up = newNode;
+                // make up/down connection
+                if (nodeUnderNew != null && nodeUnderNew.next.getKey().compareTo(key) == 0) {
+                    newNode.down = nodeUnderNew.next;
+                    nodeUnderNew.next.up = newNode;
                 }
             }
         } while (random.nextBoolean()); // coin flip
@@ -203,6 +204,7 @@ public class FlightList {
             arr.add(current.prev);
             current = current.prev;
         }
+
 
         Collections.reverse(arr);
         return arr;
@@ -274,6 +276,7 @@ public class FlightList {
         int high = key.getHour() + timeFrame;
         List<FlightNode> resFlights = new ArrayList<>();
         // modified version of predecessors method
+//        List<FlightNode> resFlights = predecessors(key, timeFrame);
         FlightNode current = search(key);
         while (current != null && sameKey(current.getKey(), key) && (current.getKey().getHour() >= low)) {
             resFlights.add(current);
@@ -286,10 +289,6 @@ public class FlightList {
                 resFlights.add(successor);
             }
         }
-//        for (FlightNode node : resFlights) {
-//            System.out.println(node.getKey());
-//        }
-//        System.out.println();
         return resFlights;
     }
 

@@ -15,7 +15,7 @@ public class FlightList {
     private FlightNode head;
     private FlightNode tail;
     private int skipHeight = 0;
-    Random random = new Random();
+    private Random random = new Random();
 
     /**
      * Constructor.
@@ -28,31 +28,6 @@ public class FlightList {
         readFile(filename);
     }
 
-    // initialize head and tail with negative and positive infinity
-    private void initializeHeadAndTail() {
-        // start with dummy list on top
-        head = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF), null);
-        tail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF), null);
-        head.next = tail;
-        tail.prev = head;
-    }
-
-    public void readFile(String filename) {
-        File file = new File(filename);
-        try {
-            FileReader freader = new FileReader(file);
-            BufferedReader reader = new BufferedReader(freader);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(" ");
-                FlightKey tempKey = new FlightKey(parts[0], parts[1], parts[2], parts[3]);
-                FlightData tempData = new FlightData(parts[4], Double.parseDouble(parts[5]));
-                insert(tempKey, tempData);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Returns true if the node with the given key exists in the skip list,
@@ -65,43 +40,13 @@ public class FlightList {
         FlightNode current = head;
         while (current.down != null) { // assuming there is a dummy list on top level
             current = current.down;
-            while (key.compareTo(current.next.getKey()) >= 0) { // if key is greater
-//                System.out.println(current.getKey());
+            while (key.compareTo(current.next.getKey()) >= 0) {
                 current = current.next;
             }
         }
-//        System.out.println("Found: " + key.toString());
         return current.getKey().compareTo(key) == 0;
     }
 
-    public FlightNode search(FlightKey key) {
-        FlightNode node = head;
-        while (node.down != null) {
-            node = node.down;
-            while (key.compareTo(node.next.getKey()) >= 0) { // stop when key is smaller than current
-                node = node.next;
-            }
-        }
-        return node; // either the same node or the one right before
-    }
-
-    public void addNewLevel() {
-        // create new head and tail
-        FlightNode newHead = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF),
-                null);
-        FlightNode newTail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF),
-                null);
-        // make sure everything is referenced correctly
-        newHead.down = head;
-        newTail.down = tail;
-        newHead.next = newTail;
-        newTail.prev = newHead;
-        head.up = newHead;
-        tail.up = newTail;
-        head = newHead;
-        tail = newTail;
-        // now head is pointing to the top left node
-    }
 
     /**
      * Insert a (key, value) pair to the skip list. Returns true if it was able
@@ -115,7 +60,6 @@ public class FlightList {
         // get position right before where node should be inserted
         FlightNode position = search(key);
         FlightNode insertPosition;
-
         // if key already exists, insertion is unsuccessful
         if (position.getKey().compareTo(key) == 0) {
             return false;
@@ -157,7 +101,6 @@ public class FlightList {
                 }
             }
         } while (random.nextBoolean()); // coin flip
-
         return true;
     }
 
@@ -179,11 +122,6 @@ public class FlightList {
         return arrayList;
     }
 
-    private boolean sameKey(FlightKey key1, FlightKey key2) {
-        return key1.getOrigin().compareTo(key2.getOrigin()) == 0 &&
-                key1.getDest().compareTo(key2.getDest()) == 0 &&
-                key1.getDate().compareTo(key2.getDate()) == 0;
-    }
 
     /**
      * Returns the list of nodes that are predecessors of a given key
@@ -204,8 +142,6 @@ public class FlightList {
             arr.add(current.prev);
             current = current.prev;
         }
-
-
         Collections.reverse(arr);
         return arr;
     }
@@ -219,23 +155,18 @@ public class FlightList {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-
         FlightNode startNode = head;
-
         FlightNode topLevelNode = startNode;
         int level = skipHeight;
-
         while (topLevelNode != null) {
-            sb.append("\nLevel: " + level + "\n");
+            sb.append("\nLevel: ").append(level).append("\n");
             while (startNode != null) {
                 sb.append(startNode.getKey());
                 if (startNode.next != null) {
                     sb.append(" - ");
                 }
-
                 startNode = startNode.next;
             }
-
             topLevelNode = topLevelNode.down;
             startNode = topLevelNode;
             level--;
@@ -275,7 +206,6 @@ public class FlightList {
         int low = key.getHour() - timeFrame;
         int high = key.getHour() + timeFrame;
         List<FlightNode> resFlights = new ArrayList<>();
-        // modified version of predecessors method
 //        List<FlightNode> resFlights = predecessors(key, timeFrame);
         FlightNode current = search(key);
         while (current != null && sameKey(current.getKey(), key) && (current.getKey().getHour() >= low)) {
@@ -290,6 +220,83 @@ public class FlightList {
             }
         }
         return resFlights;
+    }
+
+    /*
+     initialize head and tail with negative and positive infinity
+     */
+    private void initializeHeadAndTail() {
+        // start with dummy list on top
+        head = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF), null);
+        tail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF), null);
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    /*
+    reads file and inserts flights to skip list
+     */
+    private void readFile(String filename) {
+        File file = new File(filename);
+        try {
+            FileReader freader = new FileReader(file);
+            BufferedReader reader = new BufferedReader(freader);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(" ");
+                FlightKey tempKey = new FlightKey(parts[0], parts[1], parts[2], parts[3]);
+                FlightData tempData = new FlightData(parts[4], Double.parseDouble(parts[5]));
+                insert(tempKey, tempData);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+    Just like find except it also returns the node
+    If key exists, it will return the node, if it does not exist it returns the node right before the insertion point
+     */
+    private FlightNode search(FlightKey key) {
+        FlightNode node = head;
+        while (node.down != null) {
+            node = node.down;
+            while (key.compareTo(node.next.getKey()) >= 0) { // stop when key is smaller than current
+                node = node.next;
+            }
+        }
+        return node; // either the same node or the one right before
+    }
+
+    /*
+    Adds level to top of skip list and sets references correctly
+     */
+    private void addNewLevel() {
+        // create new head and tail
+        FlightNode newHead = new FlightNode(new FlightKey(NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF, NEGATIVE_INF),
+                null);
+        FlightNode newTail = new FlightNode(new FlightKey(POSITIVE_INF, POSITIVE_INF, POSITIVE_INF, POSITIVE_INF),
+                null);
+        // make sure everything is referenced correctly
+        newHead.down = head;
+        newTail.down = tail;
+        newHead.next = newTail;
+        newTail.prev = newHead;
+        head.up = newHead;
+        tail.up = newTail;
+        head = newHead;
+        tail = newTail;
+        // now head is pointing to the top left node
+    }
+
+    /*
+    Compares two Nodes' keys origin, destination, and date
+    Returns true if they are the same, false otherwise
+     */
+    private boolean sameKey(FlightKey key1, FlightKey key2) {
+        return key1.getOrigin().compareTo(key2.getOrigin()) == 0 &&
+                key1.getDest().compareTo(key2.getDest()) == 0 &&
+                key1.getDate().compareTo(key2.getDate()) == 0;
     }
 
 }

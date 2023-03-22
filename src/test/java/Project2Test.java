@@ -29,12 +29,12 @@ public class Project2Test {
                     throw new IndexOutOfBoundsException();
                 FlightKey key = new FlightKey(arr[0], arr[1], arr[2], arr[3]);
                 // make sure that a flight with this key is in the skip list:
-//                System.out.println(key);
                 if (!list.find(key)) {
                     Assert.fail("Failed to find the following flight: " + s);
                 }
-                System.out.println(list);
             }
+            System.out.println(list.toString());
+            list.print("test.txt");
         }
         catch (IOException e) {
             Assert.fail("IOException occured while reading from the file: " + e);

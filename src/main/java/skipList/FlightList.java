@@ -249,8 +249,14 @@ public class FlightList {
      * @param filename the name of the file
      */
     public void print(String filename) {
-        // FILL IN CODE
-
+        String result = toString();
+        try (FileWriter fw = new FileWriter(filename)) {
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(result);
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -267,20 +273,23 @@ public class FlightList {
         int low = key.getHour() - timeFrame;
         int high = key.getHour() + timeFrame;
         List<FlightNode> resFlights = new ArrayList<>();
+        // modified version of predecessors method
         FlightNode current = search(key);
         while (current != null && sameKey(current.getKey(), key) && (current.getKey().getHour() >= low)) {
             resFlights.add(current);
             current = current.prev;
         }
         Collections.reverse(resFlights);
-
         List<FlightNode> successors = successors(key);
-
         for (FlightNode successor : successors) {
             if (successor.getKey().getHour() <= high) {
                 resFlights.add(successor);
             }
         }
+//        for (FlightNode node : resFlights) {
+//            System.out.println(node.getKey());
+//        }
+//        System.out.println();
         return resFlights;
     }
 

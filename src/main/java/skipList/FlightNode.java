@@ -8,7 +8,6 @@ package skipList;
 public class FlightNode {
 	private FlightKey key;
 	private FlightData data;
-	// FILL IN CODE: add other variables: next, prev, down, up
 	FlightNode next;
 	FlightNode prev;
 	FlightNode down;

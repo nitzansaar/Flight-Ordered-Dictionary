@@ -5,7 +5,6 @@ package skipList;
  * time. Implements Comparable<FlightKey>.
  */
 public class FlightKey implements Comparable<FlightKey> {
-	// Each key is a tuple: origin, destination, date, time
 	private String origin;
 	private String dest;
 	private String date;
@@ -61,8 +60,7 @@ public class FlightKey implements Comparable<FlightKey> {
 	 * @return String
 	 */
 	public String toString() {
-		// FILL IN CODE
-		return "(" + origin + ", " + dest + ", " + date  + ", " + time + ")";
+		return "(Origin: " + origin + ", Destination: " + dest + ", Date: " + date  + ", Time: " + time + ")";
 	}
 
 	/**

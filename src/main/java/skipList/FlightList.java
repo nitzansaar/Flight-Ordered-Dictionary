@@ -28,7 +28,6 @@ public class FlightList {
         readFile(filename);
     }
 
-
     /**
      * Returns true if the node with the given key exists in the skip list,
      * false otherwise. This method needs to be efficient.
@@ -206,7 +205,6 @@ public class FlightList {
         int low = key.getHour() - timeFrame;
         int high = key.getHour() + timeFrame;
         List<FlightNode> resFlights = new ArrayList<>();
-//        List<FlightNode> resFlights = predecessors(key, timeFrame);
         FlightNode current = search(key);
         while (current != null && sameKey(current.getKey(), key) && (current.getKey().getHour() >= low)) {
             resFlights.add(current);
